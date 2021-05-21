@@ -1,0 +1,20 @@
+{
+  "name": "san-learn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cqq626/san-learn.git"
+  },
+  "keywords": [],
+  "author": "chenqian",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cqq626/san-learn/issues"
+  },
+  "homepage": "https://github.com/cqq626/san-learn#readme"
+}
