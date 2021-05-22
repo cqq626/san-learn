@@ -47,6 +47,9 @@
             display: flex;
             gap: 10px;
         }
+        .tree {
+            display: flex;
+        }
         .tree-area {
             margin: 10px 0;
             border: 1px solid;
@@ -109,7 +112,9 @@
                                 <div class="res">
                                 解析：
                                 <div class="tree" v-if="hasRes">
-                                    <parse-tree class="tree-area" v-for="(resItem, idx) in res" :tree-info="resItem" />
+                                    <div>
+                                        <parse-tree class="tree-area" v-for="(resItem, idx) in res" :tree-info="resItem" />
+                                    </div>
                                 </div>
                                 </div>
                             </div>
