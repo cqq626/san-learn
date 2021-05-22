@@ -10443,11 +10443,12 @@ function createComponentLoader(options) {
         return function wrappedFn(...args) {
             pushStack(name);
             const res = fn(...args);
+            window.RES = [];
+            recordExpr(res);
             popStack(name);
             return res;
         }
     }
-
     function pushStack(fnName) {
         if (!window.STACK) {
             window.STACK = [];
@@ -10462,6 +10463,58 @@ function createComponentLoader(options) {
         window.STACK.pop();
         log(`${MAP[fnName]}(${fnName}): 结束`);
     }
+    function recordExpr(expr) {
+        const {value, type, operator, segs} = expr;
+        const prefix = [
+            ,
+            '字符串',
+            '数值',
+            '布尔',
+            '访问器',
+            '插值',
+            '调用',
+            '文本',
+            '二元',
+            '一元',
+            '三元',
+            '数组',
+            '对象',
+            '括号'
+        ][type];
+        let res = '';
+        if (value) {
+            res = `${prefix}(${value})`;
+            window.RES.push(res);
+            return res;
+        }
+        switch (type) {
+           case 8:
+               const left = recordExpr(segs[0]);
+               const right = recordExpr(segs[1]);
+               const operatorType = {
+                   37: '%',
+                   43: '+',
+                   45: '-',
+                   42: '*',
+                   47: '/',
+                   60: '<',
+                   62: '>',
+                   76: '&&',
+                   94: '!=',
+                   121: '<=',
+                   122: '==',
+                   123: '>=',
+                   155: '!==',
+                   183: '===',
+                   248: '||'
+               }
+               res = `运算符:${operatorType[operator]} 左:${left} 右:${right}`;
+               break;
+        }
+        res = `${prefix}(${res})`;
+        window.RES.push(res);
+        return res;
+    }
     function log(info) {
         if (!window.LOG) {
             window.LOG = [];
@@ -10469,7 +10522,8 @@ function createComponentLoader(options) {
         window.LOG.push({
             stack: window.STACK.join('.'),
             index: window.WALKER.index,
-            info
+            info,
+            res: (window.RES || []).join('#')
         });
     }
     window.MAP = {

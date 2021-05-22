@@ -9,19 +9,12 @@
         * {
             box-sizing: border-box;
         }
-        .show {
+        .info {
             display: flex;
         }
-        .stacks {
-            margin-left: 100px;
-        }
-        .stack {
-            border: 1px solid black;
-            padding: 5px;
-        }
-
         .expr {
             position: relative;
+            margin-bottom: 30px;
         }
         .expr-item {
             display: inline-flex;
@@ -39,11 +32,13 @@
             border: 15px solid transparent;
             border-bottom: 15px solid red;
         }
-        .info {
+        .stacks {
             width: 300px;
+            margin-right: 100px;
         }
-        .detail {
-            margin-top: 30px;
+        .stack, .res-item {
+            border: 1px solid black;
+            padding: 5px;
         }
     </style>
 </head>
@@ -66,16 +61,24 @@
                         <button @click="go(-1)">后退</button>
                     </div>
                     <hr />
-                    <div class="show" v-if="clicked">
-                        <div class="info">
-                            <div class="expr">
-                                <span class="expr-item" v-for="(item, idx) in exprItems">{{item}}</span>
-                                <div class="arrow" :style="{left: index * 30 + 'px'}"></div>
-                            </div>
-                            <div class="detail">{{info}}</div>
+                    <div v-if="clicked">
+                        <div class="expr">
+                            <span class="expr-item" v-for="(item, idx) in exprItems">{{item}}</span>
+                            <div class="arrow" :style="{left: index * 30 + 'px'}"></div>
                         </div>
-                        <div class="stacks">
-                            <div class="stack" v-for="(stack, idx) in stacks">{{stack}}</div>
+                        <div class="info">
+                            <div class="stacks">
+                                <div class="stack" v-for="(stack, idx) in stacks">{{stack}}</div>
+                            </div>
+                            <div>
+                                <div class="detail">说明：{{info}}</div>
+                                <div class="res">
+                                解析：
+                                <div>
+                                        <div class="res-item" v-for="(item, idx) in res">{{item}}</div>
+                                </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -87,6 +90,7 @@
 
                 info: '',
                 index: 0,
+                res: [],
                 stacks: [],
                 clicked: false
             },
@@ -107,10 +111,11 @@
                         this.reset();
                     } else {
                         const log = this.logs[this.cur];
-                        const { stack, index, info } = log;
+                        const { stack, index, info, res } = log;
                         this.stacks = stack.split('.').map(val => `${window.MAP[val]}(${val})`).reverse();
                         this.index = index;
                         this.info = info;
+                        this.res = res.split('#');
                     }
                 }
             },
