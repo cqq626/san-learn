@@ -1261,6 +1261,7 @@ Walker.prototype.goUntil = function (charCode) {
  * @return {Array?}
  */
 Walker.prototype.match = function (reg, isMatchStart) {
+    log(`匹配: ${reg.toString()}`);
     reg.lastIndex = this.index;
 
     var match = reg.exec(this.source);
@@ -2162,7 +2163,17 @@ function parseExpr(source) {
         return source;
     }
 
-    return readTertiaryExpr(new Walker(source));
+    const walker = new Walker(source);
+    window.WALKER = walker;
+
+    return readTertiaryExpr(new Proxy(walker, {
+        set: function (target, propKey, value, receiver) {
+            if (propKey === 'index') {
+                log('指针移动');
+            }
+            return Reflect.set(target, propKey, value, receiver);
+        }
+    }));
 }
 
 // exports = module.exports = parseExpr;
@@ -10425,5 +10436,69 @@ function createComponentLoader(options) {
     // #[begin] devtool
     emitDevtool.start(san);
     // #[end]
+
+    // 自定义开始
+    function wrapFunction(fn) {
+        const name = fn.name;
+        return function wrappedFn(...args) {
+            pushStack(name);
+            const res = fn(...args);
+            popStack(name);
+            return res;
+        }
+    }
+
+    function pushStack(fnName) {
+        if (!window.STACK) {
+            window.STACK = [];
+        }
+        window.STACK.push(fnName);
+        log(`${MAP[fnName]}(${fnName}): 开始`);
+    }
+    function popStack(fnName) {
+        if (!window.STACK) {
+            window.STACK = [];
+        }
+        window.STACK.pop();
+        log(`${MAP[fnName]}(${fnName}): 结束`);
+    }
+    function log(info) {
+        if (!window.LOG) {
+            window.LOG = [];
+        }
+        window.LOG.push({
+            stack: window.STACK.join('.'),
+            index: window.WALKER.index,
+            info
+        });
+    }
+    window.MAP = {
+        readTertiaryExpr: '三元',
+        readLogicalORExpr: '逻辑或',
+        readLogicalANDExpr: '逻辑与',
+        readEqualityExpr: '相等比对',
+        readRelationalExpr: '关系判断',
+        readAdditiveExpr: '加减法',
+        readMultiplicativeExpr: '乘除法',
+        readUnaryExpr: '一元',
+        readCall: '调用',
+        readAccessor: '访问',
+        readIdent: '标识符',
+        readString: '字符串',
+        readParenthesizedExpr: '括号'
+    };
+    readTertiaryExpr = wrapFunction(readTertiaryExpr)
+    readLogicalORExpr = wrapFunction(readLogicalORExpr)
+    readLogicalANDExpr = wrapFunction(readLogicalANDExpr)
+    readEqualityExpr = wrapFunction(readEqualityExpr)
+    readRelationalExpr = wrapFunction(readRelationalExpr)
+    readAdditiveExpr = wrapFunction(readAdditiveExpr)
+    readMultiplicativeExpr = wrapFunction(readMultiplicativeExpr)
+    readUnaryExpr = wrapFunction(readUnaryExpr)
+    readCall = wrapFunction(readCall)
+    readAccessor = wrapFunction(readAccessor)
+    readIdent = wrapFunction(readIdent)
+    readString = wrapFunction(readString)
+    readParenthesizedExpr = wrapFunction(readParenthesizedExpr)
 })(this);
 //@ sourceMappingURL=san.dev.js.map

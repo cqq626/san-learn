@@ -2,13 +2,136 @@
 
 <head>
     <title>Quick Start</title>
+    <meta charset='UTF-8'>
     <script src="./san.dev.js"></script>
+    <script src="./vue.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        .show {
+            display: flex;
+        }
+        .stacks {
+            margin-left: 100px;
+        }
+        .stack {
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        .expr {
+            position: relative;
+        }
+        .expr-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border: 1px solid black;
+        }
+        .arrow {
+            position: absolute;
+            bottom: -20px;
+            width: 0;
+            height: 0;
+            border: 15px solid transparent;
+            border-bottom: 15px solid red;
+        }
+        .detail {
+            margin-top: 30px;
+        }
+    </style>
 </head>
 
 <body>
+    <div id="app"></div>
     <script>
-        var parsed = san.parseExpr('1+2*3+4');
-        console.log(parsed);
+        new Vue({
+            el: '#app',
+            template: `
+                <div class="root">
+                    <div class="input">
+                        <input v-model.trim="expr" />
+                        <button @click="parse">解析</button>
+                    </div>
+                    <hr />
+                    <div class="steps">
+                        <span class="overview">步骤: {{cur + 1}}/{{total}}</span>
+                        <button @click="go(1)">前进</button>
+                        <button @click="go(-1)">后退</button>
+                    </div>
+                    <hr />
+                    <div class="show">
+                        <div class="info">
+                            <div class="expr">
+                                <span class="expr-item" v-for="(item, idx) in exprItems">{{item}}</span>
+                                <div class="arrow" :style="{left: index * 30 + 'px'}"></div>
+                            </div>
+                            <div class="detail">{{info}}</div>
+                        </div>
+                        <div class="stacks">
+                            <div class="stack" v-for="(stack, idx) in stacks">{{stack}}</div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            data: {
+                logs: [],
+                expr: '1+2*3+4',
+                cur: -1,
+
+                info: '',
+                index: 0,
+                stacks: []
+            },
+            computed: {
+                total () {
+                    return this.logs.length;
+                },
+                exprItems () {
+                    if (!this.expr) {
+                        return [];
+                    }
+                    return this.expr.split('');
+                }
+            },
+            watch: {
+                cur (newVal) {
+                    if (this.cur === -1) {
+                        this.reset();
+                    } else {
+                        const log = this.logs[this.cur];
+                        const { stack, index, info } = log;
+                        this.stacks = stack.split('.').map(val => `${window.MAP[val]}(${val})`).reverse();
+                        this.index = index;
+                        this.info = info;
+                    }
+                }
+            },
+            methods: {
+                parse() {
+                    san.parseExpr(this.expr);
+                    this.logs = window.LOG;
+                    this.cur = -1;
+                },
+                go(step) {
+                    if (step > 0 && this.cur >= this.total - 1) {
+                        return;
+                    }
+                    if (step < 0 && this.cur < 0) {
+                        return;
+                    }
+                    this.cur = this.cur + step;
+                },
+                reset() {
+                    this.index = 0;
+                    this.info = '';
+                    this.stacks = [];
+                }
+            }
+        })
     </script>
 </body>
 
