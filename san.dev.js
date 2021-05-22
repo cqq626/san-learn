@@ -2163,6 +2163,7 @@ function parseExpr(source) {
         return source;
     }
 
+    init();
     const walker = new Walker(source);
     window.WALKER = walker;
 
@@ -10450,16 +10451,10 @@ function createComponentLoader(options) {
         }
     }
     function pushStack(fnName) {
-        if (!window.STACK) {
-            window.STACK = [];
-        }
         window.STACK.push(fnName);
         log(`${MAP[fnName]}(${fnName}): 开始`);
     }
     function popStack(fnName) {
-        if (!window.STACK) {
-            window.STACK = [];
-        }
         window.STACK.pop();
         log(`${MAP[fnName]}(${fnName}): 结束`);
     }
@@ -10516,15 +10511,17 @@ function createComponentLoader(options) {
         return res;
     }
     function log(info) {
-        if (!window.LOG) {
-            window.LOG = [];
-        }
         window.LOG.push({
             stack: window.STACK.join('.'),
             index: window.WALKER.index,
             info,
             res: (window.RES || []).join('#')
         });
+    }
+    function init() {
+        window.LOG = [];
+        window.STACK = [];
+        window.RES = [];
     }
     window.MAP = {
         readTertiaryExpr: '三元',

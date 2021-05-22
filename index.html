@@ -112,7 +112,7 @@
                     } else {
                         const log = this.logs[this.cur];
                         const { stack, index, info, res } = log;
-                        this.stacks = stack.split('.').map(val => `${window.MAP[val]}(${val})`).reverse();
+                        this.stacks = stack ? stack.split('.').map(val => `${window.MAP[val]}(${val})`).reverse() : [];
                         this.index = index;
                         this.info = info;
                         this.res = res.split('#');
