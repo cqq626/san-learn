@@ -10487,7 +10487,7 @@ function createComponentLoader(options) {
                const left = recordExpr(segs[0]);
                left.value = `左: ${left.value}`;
                const right = recordExpr(segs[1]);
-               right.value = `左: ${right.value}`;
+               right.value = `右: ${right.value}`;
                const operatorType = {
                    37: '%',
                    43: '+',
