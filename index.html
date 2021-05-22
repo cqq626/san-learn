@@ -57,13 +57,13 @@
                         <button @click="parse">解析</button>
                     </div>
                     <hr />
-                    <div class="steps">
+                    <div class="steps" v-if="clicked">
                         <span class="overview">步骤: {{cur + 1}}/{{total}}</span>
                         <button @click="go(1)">前进</button>
                         <button @click="go(-1)">后退</button>
                     </div>
                     <hr />
-                    <div class="show">
+                    <div class="show" v-if="clicked">
                         <div class="info">
                             <div class="expr">
                                 <span class="expr-item" v-for="(item, idx) in exprItems">{{item}}</span>
@@ -84,7 +84,8 @@
 
                 info: '',
                 index: 0,
-                stacks: []
+                stacks: [],
+                clicked: false
             },
             computed: {
                 total () {
@@ -115,6 +116,7 @@
                     san.parseExpr(this.expr);
                     this.logs = window.LOG;
                     this.cur = -1;
+                    this.clicked = true;
                 },
                 go(step) {
                     if (step > 0 && this.cur >= this.total - 1) {
