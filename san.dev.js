@@ -10444,8 +10444,7 @@ function createComponentLoader(options) {
         return function wrappedFn(...args) {
             pushStack(name);
             const res = fn(...args);
-            window.RES = [];
-            recordExpr(res);
+            window.RES = recordExpr(res);
             popStack(name);
             return res;
         }
@@ -10458,7 +10457,7 @@ function createComponentLoader(options) {
         window.STACK.pop();
         log(`${MAP[fnName]}(${fnName}): 结束`);
     }
-    function recordExpr(expr) {
+    function recordExpr(expr, defaultPrefix = '') {
         const {value, type, operator, segs} = expr;
         const prefix = [
             ,
@@ -10476,16 +10475,15 @@ function createComponentLoader(options) {
             '对象',
             '括号'
         ][type];
-        let res = '';
+        let res = {};
         if (value) {
-            res = `${prefix}(${value})`;
-            window.RES.push(res);
+            res.value = `${defaultPrefix ? defaultPrefix + ': ' : ''}${prefix}(${value})`;
             return res;
         }
         switch (type) {
            case 8:
-               const left = recordExpr(segs[0]);
-               const right = recordExpr(segs[1]);
+               const left = recordExpr(segs[0], '左');
+               const right = recordExpr(segs[1], '右');
                const operatorType = {
                    37: '%',
                    43: '+',
@@ -10503,11 +10501,11 @@ function createComponentLoader(options) {
                    183: '===',
                    248: '||'
                }
-               res = `运算符:${operatorType[operator]} 左:${left} 右:${right}`;
+               res.value = `运算符:${operatorType[operator]}`;
+               res.children = [left, right]
                break;
         }
-        res = `${prefix}(${res})`;
-        window.RES.push(res);
+        res.value = `${defaultPrefix ? defaultPrefix + ': ' : ''}${prefix}(${res.value})`;
         return res;
     }
     function log(info) {
@@ -10515,13 +10513,13 @@ function createComponentLoader(options) {
             stack: window.STACK.join('.'),
             index: window.WALKER.index,
             info,
-            res: (window.RES || []).join('#')
+            res: JSON.stringify(window.RES)
         });
     }
     function init() {
         window.LOG = [];
         window.STACK = [];
-        window.RES = [];
+        window.RES = {};
     }
     window.MAP = {
         readTertiaryExpr: '三元',
