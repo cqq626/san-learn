@@ -10458,7 +10458,7 @@ function createComponentLoader(options) {
         window.STACK.pop();
         log(`${MAP[fnName]}(${fnName}): 结束`);
     }
-    function recordExpr(expr, defaultPrefix = '') {
+    function recordExpr(expr) {
         const {value, type, operator, segs} = expr;
         const prefix = [
             ,
@@ -10478,14 +10478,16 @@ function createComponentLoader(options) {
         ][type];
         let res = {};
         if (value) {
-            res.value = `${defaultPrefix ? defaultPrefix + ': ' : ''}${prefix}(${value})`;
-            window.RES.push(res);
+            res.value = `${prefix}(${value})`;
+            window.RES.push(JSON.parse(JSON.stringify(res)));
             return res;
         }
         switch (type) {
            case 8:
-               const left = recordExpr(segs[0], '左');
-               const right = recordExpr(segs[1], '右');
+               const left = recordExpr(segs[0]);
+               left.value = `左: ${left.value}`;
+               const right = recordExpr(segs[1]);
+               right.value = `左: ${right.value}`;
                const operatorType = {
                    37: '%',
                    43: '+',
@@ -10507,8 +10509,8 @@ function createComponentLoader(options) {
                res.children = [left, right]
                break;
         }
-        res.value = `${defaultPrefix ? defaultPrefix + ': ' : ''}${prefix}(${res.value})`;
-        window.RES.push(res);
+        res.value = `${prefix}(${res.value})`;
+        window.RES.push(JSON.parse(JSON.stringify(res)));
         return res;
     }
     function log(info) {
