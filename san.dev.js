@@ -10444,7 +10444,8 @@ function createComponentLoader(options) {
         return function wrappedFn(...args) {
             pushStack(name);
             const res = fn(...args);
-            window.RES = recordExpr(res);
+            window.RES = [];
+            recordExpr(res);
             popStack(name);
             return res;
         }
@@ -10478,6 +10479,7 @@ function createComponentLoader(options) {
         let res = {};
         if (value) {
             res.value = `${defaultPrefix ? defaultPrefix + ': ' : ''}${prefix}(${value})`;
+            window.RES.push(res);
             return res;
         }
         switch (type) {
@@ -10506,6 +10508,7 @@ function createComponentLoader(options) {
                break;
         }
         res.value = `${defaultPrefix ? defaultPrefix + ': ' : ''}${prefix}(${res.value})`;
+        window.RES.push(res);
         return res;
     }
     function log(info) {
@@ -10519,7 +10522,7 @@ function createComponentLoader(options) {
     function init() {
         window.LOG = [];
         window.STACK = [];
-        window.RES = {};
+        window.RES = [];
     }
     window.MAP = {
         readTertiaryExpr: '三元',
